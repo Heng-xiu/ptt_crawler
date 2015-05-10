@@ -1,1 +1,81 @@
+#!/usr/bin/python
+#coding:utf-8
+#Auther:xiuxiu
 
+import urllib2
+from sgmllib import SGMLParser
+import time
+
+# Catch webiste title 
+class CatchTitle(SGMLParser):
+	def __init__(self):
+		SGMLParser.__init__(self)
+		self.is_title = ""
+		self.title = []
+
+	def start_title(self, attrs):
+		self.is_title = 1
+
+	def end_title(self):
+		self.is_title = ""
+
+	def handle_data(self, text):
+		if self.is_title == 1:
+			self.title.append(text)
+
+# catch websit content
+website = 'http://rss.ptt.cc/Steam.xml'
+content = urllib2.urlopen(website).read()
+#content = urllib2.urlopen('http://www.ptt.cc/bbs/Steam/index.html').read()
+
+# Name
+catchtitle = CatchTitle()
+
+# Put catched content in praser
+catchtitle.feed(content)
+
+# Set a value to determine are there any free stuff
+is_free_stuff = 0;
+
+# Free stuff message
+def free_stuff_message():
+	if is_free_stuff == 0:
+		print 'Since like you have to get more lucky.';
+	elif is_free_stuff == 1:
+		print 'Geeeeeeeeeet something freeeeeeeeee!!';
+	else:
+		pass;
+
+# Program Start
+while 1:
+	print '------抓取Ptt steam 開始-------\n'
+
+	for item in catchtitle.title:
+	# Decode
+		context = item.decode('utf-8').encode('utf8')
+
+		if '免費' in context:
+			is_free_stuff = 1;
+			print context 
+
+		elif '贈送' in context:
+			is_free_stuff = 1;
+			print context
+
+		elif '領取' in context:
+			is_free_stuff = 1;
+			print context
+
+		#elif '抽獎' in context:
+		#	print context	
+		#elif '遊戲' in context:
+		#	print context
+		#elif '特價' in context:
+		#	print context
+		else:
+			is_free_stuff = 0;
+
+	free_stuff_message();
+	print '\n------抓取Ptt steam 完畢-------'
+	time.sleep(10);
+end
